@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +16,8 @@ public class Tracker : MonoBehaviour
         InvalidTime = 2,
         RequirePermission = 4
     }
+
+    private const string SAVE_KEY_PREFIX = "Last_used_";
 
     private readonly TimeSpan mCheckerShift = new TimeSpan(0, 0, 42);
 
@@ -71,10 +74,9 @@ public class Tracker : MonoBehaviour
         OnPathChanged(mPath.text);
     }
 
-    private void OnTimeChanged(string _)
+    private void OnTimeChanged(string _ = "")
     {
-        if (
-            int.TryParse(mYear.text, out var year) &&
+        if (int.TryParse(mYear.text, out var year) &&
             int.TryParse(mMonth.text, out var month) &&
             int.TryParse(mDay.text, out var day) &&
             int.TryParse(mHour.text, out var hour) &&
@@ -114,7 +116,7 @@ public class Tracker : MonoBehaviour
     private void AddTime(TimeSpan timeSpan)
     {
         mTotalShift += timeSpan;
-        mTimeShift.text = mTotalShift.ToString(@"dd\.hh\.mm");
+        mTimeShift.text = $"{mTotalShift.Days:00} {mTotalShift.Hours:00}:{mTotalShift.Minutes:00}";
 
         TimeControl.GetSystemTime(out var time);
         time += timeSpan;
@@ -168,19 +170,34 @@ public class Tracker : MonoBehaviour
         CheckPermissions();
         CheckErrorMessage();
 
-        mPath.onValueChanged.AddListener(OnPathChanged);
-        mYear.onValueChanged.AddListener(OnTimeChanged);
-        mMonth.onValueChanged.AddListener(OnTimeChanged);
-        mDay.onValueChanged.AddListener(OnTimeChanged);
-        mHour.onValueChanged.AddListener(OnTimeChanged);
-        mMinute.onValueChanged.AddListener(OnTimeChanged);
+        InitInput(nameof(mPath), mPath, OnPathChanged);
+
+        InitInput(nameof(mYear), mYear, OnTimeChanged);
+        InitInput(nameof(mMonth), mMonth, OnTimeChanged);
+        InitInput(nameof(mDay), mDay, OnTimeChanged);
+        InitInput(nameof(mHour), mHour, OnTimeChanged);
+        InitInput(nameof(mMinute), mMinute, OnTimeChanged);
 
         mFileWatcher.NotifyFilter = NotifyFilters.LastWrite;
         mFileWatcher.Changed += OnFileChanged;
         mFileWatcher.EnableRaisingEvents = true;
 
         OnPathChanged(mPath.text);
-        OnTimeChanged(string.Empty);
+        OnTimeChanged();
+    }
+
+    private static void InitInput(string key, InputField field, Action<string> action)
+    {
+        var fullKey = $"{SAVE_KEY_PREFIX}{key}";
+
+        if (PlayerPrefs.HasKey(fullKey))
+            field.text = PlayerPrefs.GetString(fullKey);
+
+        field.onValueChanged.AddListener(value =>
+        {
+            PlayerPrefs.SetString(fullKey, field.text);
+            action(field.text);
+        });
     }
 
     private void Update()
