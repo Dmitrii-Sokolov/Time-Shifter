@@ -63,6 +63,11 @@ public class Tracker : MonoBehaviour
     {
         AddTime(-mTotalShift);
     }
+    
+    public void ShiftTime()
+    {
+        AddTime(mCurrentShift);
+    }
 
     public void Quit()
     {
