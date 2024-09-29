@@ -45,7 +45,9 @@ public class Tracker : MonoBehaviour
     private Text mTimeShift = default;
     [SerializeField]
     private Text mErrorMessage = default;
-
+    
+    private float Cooldown;
+    
     private ErrorType CurrentErrorState
     {
         get { return mCurrentErrorState; }
@@ -120,6 +122,11 @@ public class Tracker : MonoBehaviour
 
     private void AddTime(TimeSpan timeSpan)
     {
+        if (Cooldown > 0)
+            return;
+        
+        Cooldown = 4f;
+        
         mTotalShift += timeSpan;
         mTimeShift.text = $"{mTotalShift.Days:00} {mTotalShift.Hours:00}:{mTotalShift.Minutes:00}";
 
@@ -207,6 +214,7 @@ public class Tracker : MonoBehaviour
 
     private void Update()
     {
+        Cooldown -= Time.deltaTime;
         mActionQueue?.Invoke();
         mActionQueue = null;
     }
