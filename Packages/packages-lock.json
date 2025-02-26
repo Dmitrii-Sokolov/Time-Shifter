@@ -6,15 +6,6 @@
       "source": "builtin",
       "dependencies": {}
     },
-    "com.unity.2d.tilemap": {
-      "version": "1.0.0",
-      "depth": 0,
-      "source": "builtin",
-      "dependencies": {
-        "com.unity.modules.tilemap": "1.0.0",
-        "com.unity.modules.uielements": "1.0.0"
-      }
-    },
     "com.unity.ext.nunit": {
       "version": "2.0.5",
       "depth": 2,
@@ -32,7 +23,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.4.4",
+      "version": "1.4.6",
       "depth": 1,
       "source": "registry",
       "dependencies": {
